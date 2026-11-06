@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Node.js：JavaScript 运行环境与高并发 I/O 机制。10 分钟技术分享可视化页面。">
+  <title>Node.js：为什么单线程还能处理大量并发？</title>
+  <style>
+    :root{--bg:#f7f8f7;--paper:#fff;--ink:#17251f;--sub:#637269;--line:#e2e9e4;--green:#168463;--green-2:#dcefe7;--blue:#4872af;--blue-2:#eaf0fa;--gold:#af7423;--gold-2:#fff2da;--shadow:0 8px 32px rgba(21,42,32,.035)}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;line-height:1.7;letter-spacing:.006em}button{font:inherit}a{color:inherit;text-decoration:none}
+    .topbar{height:66px;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:0 34px;position:sticky;top:0;z-index:30;background:rgba(255,255,255,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+    .brand{display:flex;align-items:center;gap:12px;font-weight:750;font-size:15px;letter-spacing:.02em}.logo{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:#1c7a5a;color:#fff;font-size:12px;font-weight:850}.topright{display:flex;align-items:center;gap:9px}.pill{border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:12px;color:var(--sub);background:#fff}.btn{padding:9px 14px;border-radius:9px;border:1px solid #d8e4dc;background:white;color:var(--ink);font-weight:650;font-size:13px;cursor:pointer;transition:.18s}.btn:hover{border-color:#9acdb7;box-shadow:0 2px 10px #d0e5d9}.btn.primary{background:#1f805f;border-color:#1f805f;color:#fff}.btn.primary:hover{background:#126849}.btn:disabled{opacity:.4;cursor:default}
+    .layout{max-width:1300px;margin:0 auto;display:grid;grid-template-columns:220px minmax(0,1fr);gap:48px;padding:42px 38px 90px}.sidebar{position:sticky;top:95px;align-self:start}.side-label{font-size:11px;font-weight:750;letter-spacing:.18em;color:#8b9a91;margin:4px 0 13px 14px}.side-nav{display:grid;gap:5px}.side-nav a{display:flex;align-items:center;gap:12px;font-size:13px;padding:12px 13px;color:#57685d;border-radius:9px;transition:.15s}.side-nav a .num{font-variant-numeric:tabular-nums;font-size:11px;color:#91a298}.side-nav a:hover{background:#ebf3ee}.side-nav a.active{background:#e2f1e9;color:#117351;font-weight:750}.side-nav a.active .num{color:#168463}.sidebar-foot{border-top:1px solid var(--line);margin-top:24px;padding:21px 12px 0;font-size:12px;color:#87958b;line-height:1.8}
+    .main{min-width:0;max-width:960px}.hero{padding:28px 0 39px;border-bottom:1px solid var(--line)}.eyebrow{display:flex;align-items:center;gap:8px;color:var(--green);font-size:12px;font-weight:800;letter-spacing:.13em}.eyebrow .dot{width:7px;height:7px;background:var(--green);border-radius:50%}h1{font-size:clamp(30px,4vw,45px);line-height:1.32;letter-spacing:-.045em;margin:17px 0 16px;font-weight:820}h1 em{font-style:normal;color:var(--green)}.lead{font-size:16px;color:#64756a;max-width:760px;line-height:1.95}.hero-meta{display:flex;gap:12px;align-items:center;margin-top:25px;flex-wrap:wrap}.tag{font-size:12px;border:1px solid #dce9df;color:#4a6858;background:#f7fbf8;border-radius:7px;padding:5px 10px}
+    .topic{padding:46px 0 52px;border-bottom:1px solid var(--line);scroll-margin-top:86px}.topic-head{display:flex;align-items:center;gap:13px;margin-bottom:16px}.topic-index{font-size:12px;font-weight:850;color:var(--green);background:#e3f2e9;padding:7px 10px;border-radius:7px;letter-spacing:.06em}.topic h2{font-size:clamp(23px,2.4vw,30px);line-height:1.35;letter-spacing:-.035em;margin:0;font-weight:820}.topic .intro{font-size:15px;color:#596d60;line-height:1.85;margin:12px 0 25px}.topic h3{font-size:17px;letter-spacing:-.02em;margin:30px 0 11px}.note{background:#e9f5ee;border:1px solid #d8ebdf;padding:16px 19px;border-radius:11px;font-size:14px;color:#285b44;line-height:1.8}.note strong{color:#146c4b}.muted{font-size:13px;color:var(--sub)}
+    .card{background:var(--paper);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:23px}.card-title{font-size:14px;font-weight:800;margin:0 0 15px}.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:15px}.central{background:#e6f1e9;border:1px solid #d2e7d8;color:#11633f;text-align:center;font-weight:800;border-radius:12px;padding:12px}.arrow-down{text-align:center;color:#9ab5a4;font-weight:800;font-size:23px;line-height:1.4}.env-card{border:1px solid var(--line);border-radius:13px;background:#fff;padding:17px}.env-title{font-weight:800;text-align:center;display:flex;justify-content:center;align-items:center;gap:8px;font-size:15px}.little-label{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:#92a399;margin:13px 0 5px}.engine{background:#f3f7f4;border-radius:8px;padding:10px;text-align:center;font-size:13px;font-weight:750}.apis{border-radius:8px;padding:12px;text-align:center;font-size:12px;line-height:1.85}.apis.browser{background:var(--blue-2);color:#345a96}.apis.server{background:var(--green-2);color:#267151}.chips{display:flex;flex-wrap:wrap;gap:7px}.chip{background:#f2f5f2;border:1px solid #e2eae2;padding:4px 9px;border-radius:6px;font-size:12px;color:#50645a}
+    .comparison{display:grid;grid-template-columns:1fr 1fr;gap:15px}.model{border:1px solid var(--line);border-radius:13px;padding:19px;background:#fff}.model-top{display:flex;align-items:center;gap:9px;margin-bottom:14px;font-weight:800;font-size:15px}.model-top .circle{width:10px;height:10px;background:#bb8c45;border-radius:100%}.model.green .circle{background:#14956a}.request-row{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:0 0 10px}.request{height:29px;border-radius:5px;background:#eef0ef;border:1px solid #e0e5e1;display:grid;place-items:center;font-size:10px;color:#637268}.worker{border:1px dashed #dfcaa2;border-radius:8px;background:#fff7e9;color:#986a26;text-align:center;padding:12px 6px;font-weight:750;font-size:13px}.worker.green{background:#e8f6ee;color:#13754e;border-color:#a6d8b8}.model p{font-size:12px;line-height:1.75;color:#7a8a80;margin:11px 0 0}
+    .comparison-table{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}.comparison-table th{text-align:left;background:#f5f8f5;color:#4d6254;font-size:12px}.comparison-table th,.comparison-table td{padding:13px 15px;border-bottom:1px solid var(--line)}.comparison-table tr:last-child td{border-bottom:none}.comparison-table td strong{color:#147651}
+    .code{position:relative;background:#18251e;border-radius:12px;overflow:hidden;color:#dcebe1;margin:13px 0}.code-top{height:40px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #34443b;padding:0 16px;font-size:11px;color:#b5c4ba}.copy{border:none;background:transparent;color:#c4d9c8;font-size:12px;cursor:pointer;padding:4px 6px}.copy:hover{color:white}.code pre{margin:0;overflow-x:auto;padding:16px 18px 20px;font:13px/1.8 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;tab-size:2;white-space:pre}.code .kw{color:#91c6ff}.code .fn{color:#c7db8c}.code .str{color:#f3ce9c}.code .cm{color:#789185}
+    .sim{background:#fff;border:1px solid var(--line);border-radius:15px;overflow:hidden}.sim-header{padding:17px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid var(--line);flex-wrap:wrap}.sim-headline{font-size:14px;font-weight:800}.sim-body{padding:18px 20px 20px}.sim-controls{display:flex;gap:8px;flex-wrap:wrap}.sim-btn.selected{background:#e2f2e9;border-color:#89c6aa;color:#0f6846}.sim-bars{display:grid;gap:10px;margin:19px 0}.sim-row{display:flex;align-items:center;gap:12px;font-size:12px;color:#687b6e}.sim-row>span{width:46px;flex:none}.track{height:17px;background:#f2f5f2;border-radius:5px;flex:1;overflow:hidden}.fill{height:100%;width:0;background:#53a782;transition:width .075s linear;border-radius:5px}.sim.block .fill{background:#c99e58}.sim-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;border-top:1px solid var(--line);padding-top:17px}.stat{display:flex;align-items:baseline;gap:7px}.stat strong{font-size:25px;line-height:1;font-variant-numeric:tabular-nums}.stat small{font-size:11px;color:#829185}.sim-info{font-size:12px;color:#76867c}.live{font-size:12px;color:#126f4c;font-weight:750}
+    .case-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.case{border:1px solid var(--line);border-radius:12px;padding:17px;background:#fff}.case-icon{width:38px;height:38px;border-radius:11px;background:#e7f3eb;color:#17845d;font-size:20px;display:grid;place-items:center;margin-bottom:13px}.case strong{display:block;font-size:13px;margin-bottom:5px}.case p{font-size:12px;line-height:1.65;color:#7a8b7f;margin:0}.endcard{padding:25px 26px;border-radius:15px;background:#1c392c;color:#fff;margin-top:29px}.endcard .mini{color:#91c9ae;font-size:11px;font-weight:800;letter-spacing:.12em}.endcard p{font-size:21px;line-height:1.65;font-weight:760;margin:10px 0 0;letter-spacing:-.02em}.endcard strong{color:#bceccc}.footer{margin-top:35px;display:flex;justify-content:space-between;color:#9ca9a0;font-size:11px;gap:14px}
+    .mode-nav{display:none;gap:10px;align-items:center;justify-content:space-between;padding:20px 0}.mode-counter{font-size:13px;color:var(--sub)}.mobile-nav{display:none}
+    body.presentation .sidebar{display:none}body.presentation .layout{grid-template-columns:1fr;max-width:1100px;gap:0;padding-top:24px}body.presentation .main{max-width:none}body.presentation .hero{padding:10px 0 22px}body.presentation .hero h1{font-size:31px}body.presentation .hero .lead{font-size:13px}body.presentation .hero-meta{display:none}body.presentation .topic{display:none;border-bottom:0;padding-top:27px;min-height:560px}body.presentation .topic.present{display:block}body.presentation .mode-nav{display:flex}body.presentation .footer{display:none}
+    @media(max-width:850px){.layout{grid-template-columns:1fr;padding:22px 20px 50px;gap:0}.sidebar{display:none}.topbar{padding:0 18px;height:60px}.brand{font-size:13px}.pill{display:none}.mobile-nav{display:flex;gap:8px;overflow:auto;scrollbar-width:none;margin:0 -20px;padding:13px 20px;border-bottom:1px solid var(--line)}.mobile-nav a{border:1px solid #dce8df;background:white;padding:7px 12px;border-radius:99px;font-size:12px;white-space:nowrap;color:#667769}.hero{padding-top:22px}.topic{padding-top:34px}.case-grid{grid-template-columns:1fr 1fr}body.presentation .mobile-nav{display:none}}
+    @media(max-width:560px){.grid-2,.comparison{grid-template-columns:1fr}.case-grid{grid-template-columns:1fr}.hero h1{font-size:29px}.hero .lead{font-size:14px}.card{padding:16px}.topic h2{font-size:23px}.env-card{padding:15px}.btn{padding:8px 10px}.topbar .print{display:none}.footer{display:block}body.presentation .layout{padding:10px 16px 40px}body.presentation .hero h1{font-size:25px}}
+    @media print{.topbar,.sidebar,.mobile-nav,.mode-nav,.sim-controls,.sim-footer .btn,.copy{display:none!important}.layout{display:block;padding:0}.main{max-width:none}.hero,.topic{break-inside:avoid}.topic{display:block!important;padding:22px 0}.card,.model,.sim,.case{box-shadow:none}.code{print-color-adjust:exact;-webkit-print-color-adjust:exact}body{background:#fff}body.presentation .topic{display:block!important}}
+  </style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><div class="logo">JS</div><span>TECH BRIEF / Node.js</span></div>
+  <div class="topright"><span class="pill">10 分钟技术分享</span><button class="btn print" id="printBtn" type="button">打印 / PDF</button><button class="btn primary" type="button" id="modeBtn">演讲模式</button></div>
+</header>
+<div class="layout">
+  <aside class="sidebar" aria-label="内容目录">
+    <div class="side-label">CONTENTS / 目录</div>
+    <nav class="side-nav">
+      <a href="#runtime" class="active"><span class="num">01</span> 运行环境与 V8</a>
+      <a href="#concurrency"><span class="num">02</span> 并发处理机制</a>
+      <a href="#demo"><span class="num">03</span> 并发实验</a>
+      <a href="#usage"><span class="num">04</span> 实际业务场景</a>
+    </nav>
+    <div class="sidebar-foot">阅读模式：上下滚动浏览<br>演讲模式：使用 ← → 切换章节<br>所有内容均可离线查看</div>
+  </aside>
+  <main class="main">
+    <div class="hero">
+      <div class="eyebrow"><span class="dot"></span> NODE.JS / ENGINEERING NOTE</div>
+      <h1>Node.js 为什么<em>单线程</em>，<br>还能处理大量并发请求？</h1>
+      <p class="lead">从浏览器 JavaScript、V8 引擎到 Node.js 事件循环，通过传统阻塞线程模型的对比和一个可复现的小实验，理解非阻塞 I/O 的真正价值。</p>
+      <div class="hero-meta"><span class="tag">JavaScript 运行环境</span><span class="tag">Event Loop</span><span class="tag">非阻塞 I/O</span><span class="tag">HTTP 并发实验</span></div>
+    </div>
+    <nav class="mobile-nav" aria-label="移动端目录"><a href="#runtime">01 运行环境</a><a href="#concurrency">02 并发原理</a><a href="#demo">03 实验</a><a href="#usage">04 场景</a></nav>
+
+    <section class="topic present" id="runtime" data-title="运行环境与 V8">
+      <div class="topic-head"><span class="topic-index">01</span><h2>JavaScript、V8 与 Node.js 的关系</h2></div>
+      <p class="intro">JavaScript 是编程语言，V8 是执行 JavaScript 的引擎。Chrome 和 Node.js 都可以运行 JavaScript，但它们提供的额外能力不同。</p>
+      <div class="card">
+        <div class="central">JavaScript 语言本身：变量 · 函数 · 对象 · Promise · async/await</div>
+        <div class="grid-2" style="margin-top:13px">
+          <div class="env-card">
+            <div class="env-title"><span style="color:var(--blue);font-size:19px">◉</span> Chrome 浏览器</div>
+            <div class="little-label">JavaScript engine</div>
+            <div class="engine">V8 · 执行 JavaScript</div>
+            <div class="little-label">Host APIs</div>
+            <div class="apis browser">DOM · window · localStorage<br>浏览器事件 · 页面渲染</div>
+          </div>
+          <div class="env-card">
+            <div class="env-title"><span style="color:var(--green);font-size:19px">⬢</span> Node.js</div>
+            <div class="little-label">JavaScript engine</div>
+            <div class="engine">V8 · 执行 JavaScript</div>
+            <div class="little-label">Host APIs</div>
+            <div class="apis server">fs · http · process · path<br>libuv · 操作系统能力</div>
+          </div>
+        </div>
+        <p class="muted" style="margin:15px 0 0">注意：Chrome 只是浏览器的一个例子，并非所有浏览器都使用 V8；Node.js 也可以运行在普通电脑上，不限定部署在服务器。</p>
+      </div>
+      <h3>同一种语法，不同的运行环境</h3>
+      <div class="grid-2">
+        <div class="code"><div class="code-top">浏览器 JavaScript <button class="copy" type="button">复制</button></div><pre>const x = 1 + 2;
+
+document.querySelector('#app');
+localStorage.setItem('token', '123');</pre></div>
+        <div class="code"><div class="code-top">Node.js JavaScript <button class="copy" type="button">复制</button></div><pre>const x = 1 + 2;
+
+console.log(process.cwd());
+const fs = require('node:fs');</pre></div>
+      </div>
+      <div class="note" style="margin-top:18px"><strong>核心认知：</strong>Node.js 不是一种新语言，而是 JavaScript 的运行时环境。V8 负责执行 JS，Node 还提供文件、网络、进程等系统能力；libuv 为事件循环和部分异步 I/O 提供底层支持。</div>
+    </section>
+
+    <section class="topic" id="concurrency" data-title="并发处理机制">
+      <div class="topic-head"><span class="topic-index">02</span><h2>为什么 JS 主线程只有一个，还能高并发？</h2></div>
+      <p class="intro">真正需要区分的不是“Java 与 Node 谁更快”，而是 <strong>阻塞式线程模型</strong> 与 <strong>非阻塞 I/O 模型</strong> 如何处理等待。</p>
+      <div class="comparison">
+        <div class="model"><div class="model-top"><i class="circle"></i>传统阻塞式线程池</div><div class="request-row"><div class="request">A</div><div class="request">B</div><div class="request">C</div><div class="request">D</div><div class="request">E</div></div><div class="worker">工作线程处理请求 → 阻塞等待 I/O</div><p>请求等待数据库或第三方服务时，所占用的工作线程通常不能再处理下一个请求。大量等待任务需要更多线程或排队。</p></div>
+        <div class="model green"><div class="model-top"><i class="circle"></i>Node.js 非阻塞 I/O</div><div class="request-row"><div class="request">A</div><div class="request">B</div><div class="request">C</div><div class="request">D</div><div class="request">E</div></div><div class="worker green">发起异步 I/O → 主线程继续处理其他请求</div><p>等待不会持续占用 JS 主线程。I/O 就绪后，再通过事件循环安排回调或异步函数继续执行。</p></div>
+      </div>
+      <h3>一个数字例子</h3>
+      <div class="card" style="padding:16px 18px"><p style="margin:0 0 13px;font-size:14px">假设 <strong>1000 个请求</strong>同时到达、每个请求等待 <strong>2 秒</strong>，忽略其他开销：</p>
+        <table class="comparison-table"><thead><tr><th>模型 / 约束</th><th>理论完成时间</th></tr></thead><tbody><tr><td>传统阻塞模型：100 个工作线程</td><td>约 20 秒</td></tr><tr><td>异步 I/O：下游可同时承载 1000 个操作</td><td><strong>约 2 秒 + 调度开销</strong></td></tr><tr><td>Node 异步 I/O：数据库连接池仅 100</td><td>也可能约 20 秒</td></tr></tbody></table>
+      </div>
+      <div class="note" style="margin-top:16px"><strong>重要限定：</strong>现代 Java 也有 NIO、Netty 和虚拟线程，能够高效处理高并发 I/O。这里比较的是两种执行模型，不是证明 Node.js 一定比 Java 快。Node 的优势在于以比较自然的方式组织异步等待。</div>
+    </section>
+
+    <section class="topic" id="demo" data-title="并发实验">
+      <div class="topic-head"><span class="topic-index">03</span><h2>同样是 Node，阻塞和非阻塞差多少？</h2></div>
+      <p class="intro">5 个请求同时发起，每个请求都需要“等待”2 秒。一个使用定时器模拟异步 I/O，另一个使用忙循环模拟 JS 主线程被 CPU 运算占住。</p>
+      <div class="sim" aria-label="并发时间线可视化模拟">
+        <div class="sim-header"><span class="sim-headline">交互式时间线 <span style="font-size:11px;font-weight:500;color:#8b9a8f">· 可视化模拟，并非真实压测</span></span><div class="sim-controls"><button class="btn sim-btn selected" id="asBtn" type="button">非阻塞等待</button><button class="btn sim-btn" id="blBtn" type="button">同步阻塞</button></div></div>
+        <div class="sim-body"><div class="sim-info" id="modeHint">所有请求几乎同时开始等待，完成时间可以重叠。</div><div class="sim-bars" id="simBars"><div class="sim-row"><span>请求 1</span><div class="track"><div class="fill"></div></div></div><div class="sim-row"><span>请求 2</span><div class="track"><div class="fill"></div></div></div><div class="sim-row"><span>请求 3</span><div class="track"><div class="fill"></div></div></div><div class="sim-row"><span>请求 4</span><div class="track"><div class="fill"></div></div></div><div class="sim-row"><span>请求 5</span><div class="track"><div class="fill"></div></div></div></div><div class="sim-footer"><div class="stat"><strong id="elapsed">0.0</strong><small>秒 / 模拟总耗时</small></div><div style="display:flex;align-items:center;gap:13px"><span id="simStatus" class="sim-info">准备就绪</span><button class="btn primary" id="startSim" type="button">▶ 开始演示</button></div></div></div>
+      </div>
+      <h3>真实实验代码</h3>
+      <div class="code"><div class="code-top">demo.cjs · Node.js 服务端 <button class="copy" type="button">复制</button></div><pre>const http = require('node:http');
+
+http.createServer((req, res) => {
+  if (req.url === '/async') {
+    // 异步定时器：模拟 I/O 等待
+    setTimeout(() => res.end('ok'), 2000);
+  } else if (req.url === '/block') {
+    // 同步忙循环：占用 JS 主线程
+    const start = Date.now();
+    while (Date.now() - start < 2000) {}
+    res.end('ok');
+  } else {
+    res.end('Demo ready');
+  }
+}).listen(3000);</pre></div>
+      <p class="muted">在终端执行 <code>node demo.cjs</code>，然后打开 <code>http://localhost:3000</code>，进入浏览器开发者工具 Console：</p>
+      <div class="code"><div class="code-top">浏览器控制台 · 并发测试 <button class="copy" type="button">复制</button></div><pre>async function test(path) {
+  const start = performance.now();
+  await Promise.all(
+    Array.from({ length: 5 }, () => fetch(path))
+  );
+  console.log(path, ((performance.now() - start) / 1000).toFixed(2) + 's');
+}
+
+await test('/async'); // 通常约 2 秒
+await test('/block'); // 通常约 10 秒</pre></div>
+      <div class="note"><strong>实验结论：</strong>非阻塞等待可以重叠；耗时同步代码却会阻塞 JS 主线程。定时器只是演示等待机制，不能据此推导真实数据库吞吐量，也不能用来判断不同编程语言的绝对性能。</div>
+    </section>
+
+    <section class="topic" id="usage" data-title="实际业务场景">
+      <div class="topic-head"><span class="topic-index">04</span><h2>哪些业务适合 Node.js？</h2></div>
+      <p class="intro">判断的关键不是“请求数量多不多”，而是每个请求主要在<strong>等待外部结果</strong>，还是在<strong>持续消耗 CPU</strong>。</p>
+      <div class="case-grid">
+        <div class="case"><div class="case-icon">◌</div><strong>客服系统 / WebSocket</strong><p>大量长连接保持在线，主要等待消息和少量网络收发。</p></div>
+        <div class="case"><div class="case-icon">⌘</div><strong>业务 API / 数据库 CRUD</strong><p>等待数据库、Redis、网络返回结果，适合异步 I/O。</p></div>
+        <div class="case"><div class="case-icon">✳</div><strong>AI API / Agent</strong><p>调用远程大模型并等待生成结果，通常是网络 I/O 场景。</p></div>
+      </div>
+      <h3>哪些场景需要格外注意？</h3>
+      <div class="card"><div class="chips"><span class="chip">复杂视频编码</span><span class="chip">大规模图像处理</span><span class="chip">耗时数学运算</span><span class="chip">模型本地推理</span></div><p style="font-size:13px;color:#64766a;margin:12px 0 0">长时间 CPU 密集型任务如果直接运行在 JS 主线程上，会拖慢其他请求。应考虑 Worker Threads、独立进程或专门计算服务。</p></div>
+      <div class="endcard"><div class="mini">KEY TAKEAWAY / 核心结论</div><p>Node.js 的优势不是 JavaScript 算得比其他语言更快，而是通过<strong>非阻塞 I/O 与事件循环</strong>，让大量等待中的请求不必一直占用 JS 主线程。</p></div>
+    </section>
+    <div class="mode-nav" id="modeNav"><button class="btn" id="prev" type="button">← 上一章节</button><span class="mode-counter" id="modeCounter">01 / 04</span><button class="btn primary" id="next" type="button">下一章节 →</button></div>
+    <div class="footer"><span>Node.js · Runtime & Concurrency</span><span>单文件 HTML · 无外部依赖 · 可离线使用</span></div>
+  </main>
+</div>
+<script>
+  (()=>{
+    const qs=(s,root=document)=>root.querySelector(s),qsa=(s,root=document)=>[...root.querySelectorAll(s)];
+    const sections=qsa('.topic'); let present=0, presenting=false;
+    function go(i){present=Math.min(sections.length-1,Math.max(0,i));sections.forEach((s,j)=>s.classList.toggle('present',j===present));qs('#modeCounter').textContent=String(present+1).padStart(2,'0')+' / 04';qs('#prev').disabled=present===0;qs('#next').disabled=present===sections.length-1;window.scrollTo({top:0,behavior:'smooth'})}
+    qs('#modeBtn').addEventListener('click',()=>{presenting=!presenting;document.body.classList.toggle('presentation',presenting);qs('#modeBtn').textContent=presenting?'退出演讲模式':'演讲模式';go(present)});
+    qs('#prev').addEventListener('click',()=>go(present-1));qs('#next').addEventListener('click',()=>go(present+1));
+    document.addEventListener('keydown',e=>{if(!presenting||e.target.matches('input,textarea'))return;if(e.key==='ArrowRight'||e.key==='PageDown'){e.preventDefault();go(present+1)}else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(present-1)}else if(e.key==='Escape')qs('#modeBtn').click()});
+    qsa('.side-nav a,.mobile-nav a').forEach(a=>a.addEventListener('click',e=>{if(presenting){e.preventDefault();go(sections.findIndex(s=>'#'+s.id===a.getAttribute('href')))}}));
+    if('IntersectionObserver' in window){const observer=new IntersectionObserver(entries=>{if(presenting)return;entries.forEach(entry=>{if(entry.isIntersecting){qsa('.side-nav a').forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+entry.target.id))}})},{rootMargin:'-20% 0px -60% 0px'});sections.forEach(s=>observer.observe(s))}
+    qs('#printBtn').addEventListener('click',()=>window.print());
+    qsa('.copy').forEach(btn=>btn.addEventListener('click',async()=>{const code=qs('pre',btn.closest('.code')).innerText;try{await navigator.clipboard.writeText(code);btn.textContent='已复制 ✓'}catch{const ta=document.createElement('textarea');ta.value=code;document.body.append(ta);ta.select();document.execCommand('copy');ta.remove();btn.textContent='已复制 ✓'}setTimeout(()=>btn.textContent='复制',1600)}));
+    let mode='async',timer=null;
+    function setMode(m){if(timer){clearInterval(timer);timer=null}mode=m;qs('.sim').classList.toggle('block',m==='block');qs('#asBtn').classList.toggle('selected',m==='async');qs('#blBtn').classList.toggle('selected',m==='block');qs('#modeHint').textContent=m==='async'?'所有请求几乎同时开始等待，完成时间可以重叠。':'五段同步计算占用同一个 JS 主线程，处理依次进行。';qs('#elapsed').textContent='0.0';qs('#simStatus').textContent='准备就绪';qs('#startSim').disabled=false;qsa('.sim-row .fill').forEach(el=>el.style.width='0%')}
+    qs('#asBtn').addEventListener('click',()=>setMode('async'));qs('#blBtn').addEventListener('click',()=>setMode('block'));
+    qs('#startSim').addEventListener('click',()=>{if(timer)return;qs('#startSim').disabled=true;qs('#simStatus').textContent='模拟运行中…';const start=performance.now();const total=mode==='async'?2000:10000;timer=setInterval(()=>{const elapsed=Math.min(total,performance.now()-start);qs('#elapsed').textContent=(elapsed/1000).toFixed(1);qsa('.sim-row .fill').forEach((bar,i)=>{let p=mode==='async'?Math.min(1,elapsed/2000):Math.min(1,Math.max(0,(elapsed-i*2000)/2000));bar.style.width=(p*100).toFixed(2)+'%'});if(elapsed>=total){clearInterval(timer);timer=null;qs('#simStatus').textContent='模拟完成 ✓';qs('#startSim').disabled=false}},50)});
+    setMode('async');
+  })();
+</script>
+</body>
+</html>
