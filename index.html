@@ -23,13 +23,14 @@
     body.presentation .sidebar{display:none}body.presentation .layout{grid-template-columns:1fr;max-width:1100px;gap:0;padding-top:24px}body.presentation .main{max-width:none}body.presentation .hero{padding:10px 0 22px}body.presentation .hero h1{font-size:31px}body.presentation .hero .lead{font-size:13px}body.presentation .hero-meta{display:none}body.presentation .topic{display:none;border-bottom:0;padding-top:27px;min-height:560px}body.presentation .topic.present{display:block}body.presentation .mode-nav{display:flex}body.presentation .footer{display:none}
     @media(max-width:850px){.layout{grid-template-columns:1fr;padding:22px 20px 50px;gap:0}.sidebar{display:none}.topbar{padding:0 18px;height:60px}.brand{font-size:13px}.pill{display:none}.mobile-nav{display:flex;gap:8px;overflow:auto;scrollbar-width:none;margin:0 -20px;padding:13px 20px;border-bottom:1px solid var(--line)}.mobile-nav a{border:1px solid #dce8df;background:white;padding:7px 12px;border-radius:99px;font-size:12px;white-space:nowrap;color:#667769}.hero{padding-top:22px}.topic{padding-top:34px}.case-grid{grid-template-columns:1fr 1fr}body.presentation .mobile-nav{display:none}}
     @media(max-width:560px){.grid-2,.comparison{grid-template-columns:1fr}.case-grid{grid-template-columns:1fr}.hero h1{font-size:29px}.hero .lead{font-size:14px}.card{padding:16px}.topic h2{font-size:23px}.env-card{padding:15px}.btn{padding:8px 10px}.topbar .print{display:none}.footer{display:block}body.presentation .layout{padding:10px 16px 40px}body.presentation .hero h1{font-size:25px}}
-    @media print{.topbar,.sidebar,.mobile-nav,.mode-nav,.sim-controls,.sim-footer .btn,.copy{display:none!important}.layout{display:block;padding:0}.main{max-width:none}.hero,.topic{break-inside:avoid}.topic{display:block!important;padding:22px 0}.card,.model,.sim,.case{box-shadow:none}.code{print-color-adjust:exact;-webkit-print-color-adjust:exact}body{background:#fff}body.presentation .topic{display:block!important}}
+    @media print{.topbar,.sidebar,.mobile-nav,.mode-nav,.sim-controls,.sim-footer .btn,.copy,.knowledge-dialog{display:none!important}.layout{display:block;padding:0}.main{max-width:none}.hero,.topic{break-inside:avoid}.topic{display:block!important;padding:22px 0}.card,.model,.sim,.case{box-shadow:none}.code{print-color-adjust:exact;-webkit-print-color-adjust:exact}body{background:#fff}body.presentation .topic{display:block!important}}
+    .knowledge-teaser{margin:25px 1px 0;border:1px solid #dce9e1;border-radius:12px;padding:15px;background:linear-gradient(155deg,#f0f8f2,#ffffff);box-shadow:var(--shadow)}.knowledge-kicker{font-size:10px;font-weight:800;letter-spacing:.12em;color:#13835c;margin-bottom:8px}.knowledge-teaser strong{font-size:14px;color:#203c2b}.knowledge-teaser p{font-size:12px;line-height:1.7;color:#6a7b70;margin:8px 0}.knowledge-link{appearance:none;border:0;background:none;color:#0c7853;font-weight:750;font-size:12px;cursor:pointer;padding:4px 0}.knowledge-link:hover{text-decoration:underline}.knowledge-dialog{position:fixed;inset:0;margin:auto;width:min(540px,calc(100vw - 28px));max-height:min(80vh,680px);overflow-y:auto;border:1px solid #dfe9e2;border-radius:18px;background:#fff;color:var(--ink);padding:25px 28px 26px;box-shadow:0 24px 90px #102a1c38}.knowledge-dialog::backdrop{background:rgba(14,30,20,.46);backdrop-filter:blur(4px)}.knowledge-dialog-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}.knowledge-dialog h2{margin:0;font-size:24px;letter-spacing:-.025em}.knowledge-dialog h3{font-size:15px;margin:19px 0 5px}.knowledge-dialog p{font-size:14px;line-height:1.85;color:#53675a;margin:15px 0}.knowledge-close{width:34px;height:34px;border:1px solid var(--line);border-radius:9px;background:#f7faf8;color:#65756b;cursor:pointer;font-size:23px;line-height:1}.knowledge-pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0}.knowledge-pair>div{background:#eff6f1;border:1px solid #dfebe3;border-radius:10px;padding:14px}.knowledge-pair strong{display:block;color:#177252;font-size:16px}.knowledge-pair span{font-size:12px;color:#6e8074}.knowledge-tip{padding:13px 15px;border-radius:10px;background:#f5f8f5;border:1px solid #e1eae3;color:#455f4c;font-size:13px;line-height:1.8}.knowledge-dialog p.knowledge-end{font-size:12px;color:#87998a;margin:15px 0 0}@media(max-width:560px){.topbar .knowledge-launch{font-size:12px;padding:7px 9px}.knowledge-dialog{padding:19px}.knowledge-dialog h2{font-size:21px}}
   </style>
 </head>
 <body>
 <header class="topbar">
   <div class="brand"><div class="logo">JS</div><span>TECH BRIEF / Node.js</span></div>
-  <div class="topright"><span class="pill">10 分钟技术分享</span><button class="btn print" id="printBtn" type="button">打印 / PDF</button><button class="btn primary" type="button" id="modeBtn">演讲模式</button></div>
+  <div class="topright"><span class="pill">10 分钟技术分享</span><button class="btn knowledge-launch" id="knowledgeBtn" type="button" aria-haspopup="dialog" aria-controls="knowledgeDialog">知识提要 · libuv</button><button class="btn print" id="printBtn" type="button">打印 / PDF</button><button class="btn primary" type="button" id="modeBtn">演讲模式</button></div>
 </header>
 <div class="layout">
   <aside class="sidebar" aria-label="内容目录">
@@ -40,6 +41,12 @@
       <a href="#demo"><span class="num">03</span> 并发实验</a>
       <a href="#usage"><span class="num">04</span> 实际业务场景</a>
     </nav>
+    <div class="knowledge-teaser">
+      <div class="knowledge-kicker">KNOWLEDGE NOTE / 知识提要</div>
+      <strong>libuv 是什么？</strong>
+      <p>了解 Node.js 事件循环和异步 I/O 背后的底层支撑，不影响正文阅读。</p>
+      <button type="button" class="knowledge-link" id="knowledgeSideBtn" aria-haspopup="dialog" aria-controls="knowledgeDialog">展开知识提要 →</button>
+    </div>
     <div class="sidebar-foot">阅读模式：上下滚动浏览<br>演讲模式：使用 ← → 切换章节<br>所有内容均可离线查看</div>
   </aside>
   <main class="main">
@@ -69,7 +76,7 @@
             <div class="little-label">JavaScript engine</div>
             <div class="engine">V8 · 执行 JavaScript</div>
             <div class="little-label">Host APIs</div>
-            <div class="apis server">fs · http · process · path<br>libuv · 操作系统能力</div>
+            <div class="apis server">fs · http · process · path<br>异步 I/O · 事件循环</div>
           </div>
         </div>
         <p class="muted" style="margin:15px 0 0">注意：Chrome 只是浏览器的一个例子，并非所有浏览器都使用 V8；Node.js 也可以运行在普通电脑上，不限定部署在服务器。</p>
@@ -85,7 +92,7 @@ localStorage.setItem('token', '123');</pre></div>
 console.log(process.cwd());
 const fs = require('node:fs');</pre></div>
       </div>
-      <div class="note" style="margin-top:18px"><strong>核心认知：</strong>Node.js 不是一种新语言，而是 JavaScript 的运行时环境。V8 负责执行 JS，Node 还提供文件、网络、进程等系统能力；libuv 为事件循环和部分异步 I/O 提供底层支持。</div>
+      <div class="note" style="margin-top:18px"><strong>核心认知：</strong>Node.js 不是一种新语言，而是 JavaScript 的运行时环境。V8 负责执行 JS，而 Node 提供文件、网络、进程等系统能力，并借助底层机制管理异步 I/O。</div>
     </section>
 
     <section class="topic" id="concurrency" data-title="并发处理机制">
@@ -155,14 +162,36 @@ await test('/block'); // 通常约 10 秒</pre></div>
     <div class="footer"><span>Node.js · Runtime & Concurrency</span><span>单文件 HTML · 无外部依赖 · 可离线使用</span></div>
   </main>
 </div>
+<dialog id="knowledgeDialog" class="knowledge-dialog" aria-labelledby="knowledgeTitle">
+  <div class="knowledge-dialog-head">
+    <div>
+      <div class="knowledge-kicker">KNOWLEDGE NOTE / 知识提要</div>
+      <h2 id="knowledgeTitle">libuv 是什么？</h2>
+    </div>
+    <button class="knowledge-close" id="knowledgeClose" type="button" aria-label="关闭知识提要">×</button>
+  </div>
+  <p><strong>libuv</strong> 是一个跨平台的 C 语言库，为 Node.js 提供事件循环、底层异步 I/O 支持以及线程池等基础能力。</p>
+  <div class="knowledge-pair">
+    <div><strong>V8</strong><span>执行 JavaScript 代码</span></div>
+    <div><strong>libuv</strong><span>支持事件循环和异步 I/O</span></div>
+  </div>
+  <h3>它怎么工作？</h3>
+  <p>网络连接通常借助操作系统的非阻塞 I/O 事件通知（例如 Linux 的 epoll）；部分文件操作、特定 DNS 查询则会使用 libuv 的线程池。I/O 就绪或任务完成后，事件循环安排相应回调执行。</p>
+  <div class="knowledge-tip"><strong>容易混淆的一点：</strong>异步不等于每个请求都启动一个线程；<code>async/await</code> 是 JavaScript 语言能力，也不是 libuv 提供的。</div>
+  <p class="knowledge-end">作为延伸概念了解即可，不需要学习 libuv 源码或 Event Loop phases。</p>
+</dialog>
 <script>
   (()=>{
     const qs=(s,root=document)=>root.querySelector(s),qsa=(s,root=document)=>[...root.querySelectorAll(s)];
     const sections=qsa('.topic'); let present=0, presenting=false;
+    const knowledgeDialog=qs('#knowledgeDialog');
+    qsa('#knowledgeBtn,#knowledgeSideBtn').forEach(btn=>btn.addEventListener('click',()=>knowledgeDialog.showModal()));
+    qs('#knowledgeClose').addEventListener('click',()=>knowledgeDialog.close());
+    knowledgeDialog.addEventListener('click',event=>{if(event.target===knowledgeDialog)knowledgeDialog.close()});
     function go(i){present=Math.min(sections.length-1,Math.max(0,i));sections.forEach((s,j)=>s.classList.toggle('present',j===present));qs('#modeCounter').textContent=String(present+1).padStart(2,'0')+' / 04';qs('#prev').disabled=present===0;qs('#next').disabled=present===sections.length-1;window.scrollTo({top:0,behavior:'smooth'})}
     qs('#modeBtn').addEventListener('click',()=>{presenting=!presenting;document.body.classList.toggle('presentation',presenting);qs('#modeBtn').textContent=presenting?'退出演讲模式':'演讲模式';go(present)});
     qs('#prev').addEventListener('click',()=>go(present-1));qs('#next').addEventListener('click',()=>go(present+1));
-    document.addEventListener('keydown',e=>{if(!presenting||e.target.matches('input,textarea'))return;if(e.key==='ArrowRight'||e.key==='PageDown'){e.preventDefault();go(present+1)}else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(present-1)}else if(e.key==='Escape')qs('#modeBtn').click()});
+    document.addEventListener('keydown',e=>{if(knowledgeDialog.open||!presenting||e.target.matches('input,textarea'))return;if(e.key==='ArrowRight'||e.key==='PageDown'){e.preventDefault();go(present+1)}else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(present-1)}else if(e.key==='Escape')qs('#modeBtn').click()});
     qsa('.side-nav a,.mobile-nav a').forEach(a=>a.addEventListener('click',e=>{if(presenting){e.preventDefault();go(sections.findIndex(s=>'#'+s.id===a.getAttribute('href')))}}));
     if('IntersectionObserver' in window){const observer=new IntersectionObserver(entries=>{if(presenting)return;entries.forEach(entry=>{if(entry.isIntersecting){qsa('.side-nav a').forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+entry.target.id))}})},{rootMargin:'-20% 0px -60% 0px'});sections.forEach(s=>observer.observe(s))}
     qs('#printBtn').addEventListener('click',()=>window.print());
